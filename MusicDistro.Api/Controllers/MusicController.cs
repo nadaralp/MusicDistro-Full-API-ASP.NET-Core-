@@ -2,6 +2,7 @@
 using System.Net.Mime;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MusicDistro.Api.DTO.Read;
@@ -13,6 +14,7 @@ using MusicDistro.Core.Services;
 namespace MusicDistro.Api.Controllers
 {
     [Route("api/musics")]
+    [Authorize]
     public class MusicController : HateoasBaseController
     {
         private readonly IMusicService _musicService;
@@ -89,6 +91,7 @@ namespace MusicDistro.Api.Controllers
         }
 
         [HttpDelete("id", Name = MethodNames.DeleteMethod)]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<MusicDtoR>> DeleteMusic(int id)
         {
             var music = await _musicService.GetMusicWithArtistById(id);

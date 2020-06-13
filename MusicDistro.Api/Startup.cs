@@ -1,19 +1,15 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using MusicDistory.Data;
 using MusicDistro.Api.Configuration;
+using MusicDistro.Api.Settings;
 using MusicDistro.Core.Entities.Auth;
 using MusicDistro.Services;
 
@@ -52,6 +48,12 @@ namespace MusicDistro.Api
                 .AddEntityFrameworkStores<MusicDbContext>() // Tells identity where our identity information is stored
                 .AddDefaultTokenProviders(); // adds the default provider to generate tokens for password reset, 2-factor auth, change email...
 
+            // Configuring a IOptions to use with DI
+            services.Configure<JwtSettings>(Configuration.GetSection(JwtSettings.Jwt));
+
+            var jwtSettings = Configuration.GetSection(JwtSettings.Jwt).Get<JwtSettings>(); // binds IConfigurationSection to the specified section
+            services.AddJwtAuth(jwtSettings);
+
             services.AddAutoMapper(typeof(Startup));
 
             services.AddDataLayer(Configuration.GetConnectionString("MusicDatabase"));
@@ -74,7 +76,7 @@ namespace MusicDistro.Api
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            app.UseAuth(); // Will enable Authentication and Authorization middleware
 
             app.UseEndpoints(endpoints =>
             {
