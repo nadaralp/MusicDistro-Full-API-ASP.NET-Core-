@@ -2,6 +2,7 @@
 using MusicDistro.Api.DTO.Read;
 using MusicDistro.Api.DTO.Write;
 using MusicDistro.Core.Entities;
+using MusicDistro.Core.Entities.Auth;
 
 namespace MusicDistro.Api.Mapping
 {
@@ -15,6 +16,7 @@ namespace MusicDistro.Api.Mapping
 
             // Resource to Domain
             CreateMap<MusicDtoW, Music>();
+            CreateMap<UserSignUp, User>();
         }
     }
 }
