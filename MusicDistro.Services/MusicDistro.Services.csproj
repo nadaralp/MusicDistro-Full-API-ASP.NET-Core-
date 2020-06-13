@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\MusicDistory.Data\MusicDistory.Data.csproj" />
     <ProjectReference Include="..\MusicDistro.Core\MusicDistro.Core.csproj" />
   </ItemGroup>

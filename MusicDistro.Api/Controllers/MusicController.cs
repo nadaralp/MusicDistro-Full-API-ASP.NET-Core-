@@ -26,7 +26,9 @@ namespace MusicDistro.Api.Controllers
             _mapper = mapper;
         }
 
+
         [HttpGet("")]
+        [AllowAnonymous]
         public async Task<IActionResult> Musics()
         {
             var musics = await _musicService.GetAllWithArtist();

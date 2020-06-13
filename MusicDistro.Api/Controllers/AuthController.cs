@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using MusicDistro.Api.DTO.Write;
 using MusicDistro.Api.Settings;
 using MusicDistro.Core.Entities.Auth;
+using MusicDistro.Core.Services;
 
 namespace MusicDistro.Api.Controllers
 {
@@ -24,13 +25,15 @@ namespace MusicDistro.Api.Controllers
         private readonly UserManager<User> _userManager; // all data access for users
         private readonly RoleManager<Role> _roleManager; // all data access for roles
         private readonly IOptionsSnapshot<JwtSettings> _jwtSettings;
+        private readonly IJwtService _jwtService;
         public AuthController
                             (IMapper mapper,
                             UserManager<User> userManager,
                             RoleManager<Role> roleManager,
-                            IOptionsSnapshot<JwtSettings> jwtSettings)
+                            IOptionsSnapshot<JwtSettings> jwtSettings,
+                            IJwtService jwtService)
          =>
-            (_mapper, _userManager, _roleManager, _jwtSettings) = (mapper, userManager, roleManager, jwtSettings);
+            (_mapper, _userManager, _roleManager, _jwtSettings, _jwtService) = (mapper, userManager, roleManager, jwtSettings, jwtService);
 
 
         [ApiConventionMethod(typeof(DefaultApiConventions),
@@ -73,7 +76,14 @@ namespace MusicDistro.Api.Controllers
                 return Ok(new
                 {
                     Response = "Sign in was successful",
-                    JWT = GenerateJwt(user, userRoles),
+                    JWT = _jwtService.GenerateToken(
+                        secret: _jwtSettings.Value.Secret,
+                        issuer: _jwtSettings.Value.Issuer,
+                        expirationInDays: Convert.ToDouble(_jwtSettings.Value.ExpirationInDays),
+                        audience: _jwtSettings.Value.Secret,
+                        user: user,
+                        roles: userRoles
+                        ),
                     UserRoles = userRoles
                 });
             }
@@ -148,36 +158,6 @@ namespace MusicDistro.Api.Controllers
 
             return BadRequest(result.Errors);
 
-        }
-
-
-        private string GenerateJwt(User user, IList<string> roles)
-        {
-            var claims = new List<Claim>()
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-            };
-
-            IEnumerable<Claim> roleClaims = roles.Select(r => new Claim(ClaimTypes.Role, r));
-            claims.AddRange(roleClaims);
-
-            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.Secret));
-            SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
-            DateTime expires = DateTime.Now.AddDays(Convert.ToDouble(_jwtSettings.Value.ExpirationInDays));
-
-            var token = new JwtSecurityToken(
-             issuer: _jwtSettings.Value.Issuer,
-             audience: _jwtSettings.Value.Issuer,
-             claims: claims,
-             expires: expires,
-             signingCredentials: credentials
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

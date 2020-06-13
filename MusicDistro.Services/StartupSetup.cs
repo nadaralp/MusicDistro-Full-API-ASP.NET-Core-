@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MusicDistro.Core.Services;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using MusicDistro.Services.JWT;
 
 namespace MusicDistro.Services
 {
@@ -12,6 +10,7 @@ namespace MusicDistro.Services
         {
             services.AddScoped<IArtistService, ArtistService>();
             services.AddScoped<IMusicService, MusicService>();
+            services.AddScoped<IJwtService, JwtService>();
         }
     }
 }
