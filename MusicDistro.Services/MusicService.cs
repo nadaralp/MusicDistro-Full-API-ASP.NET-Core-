@@ -1,5 +1,6 @@
 ﻿using MusicDistro.Core;
 using MusicDistro.Core.Entities;
+using MusicDistro.Core.Events.UserActionAudit;
 using MusicDistro.Core.Services;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace MusicDistro.Services
     {
         private readonly IUnitOfWork _unitOfWork;
 
+
         public MusicService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -22,7 +24,7 @@ namespace MusicDistro.Services
             await _unitOfWork.Musics.AddAsync(newMusic);
             await _unitOfWork.CommitAsync();
 
-            if(returnWithRelations)
+            if (returnWithRelations)
             {
                 return await _unitOfWork.Musics.GetWithArtistByIdAsync(newMusic.Id);
             }

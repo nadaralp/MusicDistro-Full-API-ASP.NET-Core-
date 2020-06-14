@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -9,7 +10,9 @@ using MusicDistro.Api.DTO.Read;
 using MusicDistro.Api.DTO.Write;
 using MusicDistro.Api.Utils.Hateoas;
 using MusicDistro.Core.Entities;
+using MusicDistro.Core.Events.UserActionAudit;
 using MusicDistro.Core.Services;
+using MusicDistro.Services.Events;
 
 namespace MusicDistro.Api.Controllers
 {
@@ -19,11 +22,21 @@ namespace MusicDistro.Api.Controllers
     {
         private readonly IMusicService _musicService;
         private readonly IMapper _mapper;
+        private readonly IUserEventService _userEventService;
+        //private readonly IUserEventSubscriber _userEventSubscriber;
 
-        public MusicController(IMusicService musicService, IMapper mapper)
+        public MusicController(
+                                IMusicService musicService,
+                                IMapper mapper,
+                                IUserEventService userEventService,
+                                IUserEventSubscriber userEventSubscriber
+                               )
         {
             _musicService = musicService;
             _mapper = mapper;
+
+            _userEventService = userEventService;
+            userEventSubscriber.SubscribeToUserEvent(userEventService);
         }
 
 
@@ -69,6 +82,11 @@ namespace MusicDistro.Api.Controllers
 
             var musicReadDto = _mapper.Map<MusicDtoR>(musicCraeted);
             BuildLinksForObject(musicReadDto, musicReadDto.Id);
+
+            // Publish event for audit
+            _userEventService.EmitUserEvent(HttpContext.User, UserActionType.ArtistAdded);
+
+
 
             HttpContext.Response.StatusCode = 201;
             return musicReadDto;

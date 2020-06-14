@@ -17,6 +17,7 @@ namespace MusicDistory.Data
 
         public DbSet<Artist> Artists { get; set; }
         public DbSet<Music> Musics { get; set; }
+        public DbSet<UserAudit> Audits { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

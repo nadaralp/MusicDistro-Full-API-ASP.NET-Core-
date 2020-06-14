@@ -1,9 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using MusicDistory.Data.Repositories;
 using MusicDistro.Core;
+using MusicDistro.Core.Entities;
+using MusicDistro.Core.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using TDistory.Data.Repositories;
 
 namespace MusicDistory.Data
 {
@@ -17,6 +21,10 @@ namespace MusicDistory.Data
             });
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            services.AddScoped<IUserAuditRepository, UserAuditRepository>();
+
+            //services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         }
     }
 }
